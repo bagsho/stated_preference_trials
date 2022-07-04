@@ -1,0 +1,106 @@
+---
+title: 'Scenarios for e-mobility Survey'
+author: "[Orhan Aktaş](https://www.linkedin.com/in/orhanaktas/)"
+date: "4 July 2022"
+output:
+  html_document:
+    theme: flatly
+    df_print: paged
+    number_sections: true
+  pdf_document: default
+  word_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+	echo = TRUE,
+	message = FALSE,
+	warning = FALSE
+)
+```
+
+```{r libraries, include=FALSE}
+library(DoE.base)
+library(formattable)
+library(tidyverse)
+library(reactablefmtr)
+```
+
+# Creating Experimental Designs
+
+defining variables for each type
+
+```{r}
+factor_definitions <- list(
+  Blocks = 1:3,
+  in_vhc_time = c(10, 15, 20),
+  wtng_time = c(5, 10, 15),
+  n_xfer = c(0, 1, 2),
+  comfort = c("uncomfortable", "comfortable"),
+  cost_car = c(6, 9,12),
+  fare = c(6, 9,12)
+)
+```
+
+## Scenarios
+
+creation of scenarios
+
+```{r}
+plan <-
+  oa.design(factor.names = factor_definitions) %>%
+  as_tibble() %>%
+  arrange(Blocks) %>%
+  group_by(Blocks) %>%
+  mutate(Scenario = row_number()) %>%
+  ungroup() %>%
+  relocate(Scenario, .after = Blocks)
+```
+
+```{r}
+plan <-plan %>% 
+  mutate(
+    in_vhc_time=in_vhc_time %>% 
+      as.character() %>% 
+      as.integer() %>% 
+      suffix(" min"),
+    wtng_time =wtng_time  %>% 
+      as.character() %>% 
+      as.integer() %>% 
+      suffix(" min"),    
+    cost_car =cost_car  %>% 
+      as.character() %>% 
+      as.integer() %>% 
+      suffix(" tl"),   
+    fare  =fare   %>% 
+      as.character() %>% 
+      as.integer() %>% 
+      suffix(" tl")  
+    )
+```
+
+table of scenarios
+
+```{r}
+
+plan %>%
+
+  formattable(list(
+    comfort = formatter(
+      "span",
+      style = ~style(
+        display = "block", 
+        padding = "0 4px", 
+        `border-radius` = "4px", 
+        `background-color` = ifelse(comfort == "comfortable", 
+                                    "orange", "white"))
+    ),
+    in_vhc_time = color_tile("white", "orange"),
+    wtng_time = color_tile("white", "orange"),
+    n_xfer = color_tile("white", "orange"),
+    wtng_time = color_tile("white", "orange"),
+    cost_car = color_tile("white", "orange"),
+    fare = color_tile("white", "orange"),
+    Blocks = color_tile("lightgreen" ,"lightpink")
+    ))
+```

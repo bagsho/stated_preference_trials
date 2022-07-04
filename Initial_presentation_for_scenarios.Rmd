@@ -1,0 +1,175 @@
+---
+title: 'Scenarios for e-mobility Survey'
+author: "[Orhan Aktaş](https://www.linkedin.com/in/orhanaktas/)"
+date: "4 July 2022"
+output:
+  html_document:
+    theme: flatly
+    df_print: paged
+    number_sections: true
+  pdf_document: default
+  word_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+	echo = TRUE,
+	message = FALSE,
+	warning = FALSE
+)
+```
+
+```{r libraries, include=FALSE}
+library(DoE.base)
+library(formattable)
+library(tidyverse)
+library(reactablefmtr)
+```
+
+# The topics that are needed to be decided
+
+## Alternative Designs
+
+-   Fractional factorial design
+
+-   Full factorial design (with blocks)
+
+## Variable Types
+
+-   Categorical
+
+-   Numeric
+
+# Creating Experimental Designs
+
+defining variables for each type
+
+```{r}
+categorical_fctr_def<-list(
+    pri_car = c("status quo", "limited"),
+    n_transfer = c("transfer free", "one transfer"),
+    freq = c("status quo", "increased"),
+    fare = c("status quo", "higher")
+  )
+
+numeric_fctr_def<-list(
+    park_price = c("10tl", "20tl"),
+    n_transfer = c("0", "1"),
+    freq = c("10min", "5min"),
+    fare = c("6tl", "9tl")
+  )
+```
+
+## Fractional factorial design
+
+creation of scenarios
+
+```{r}
+plan <-
+  oa.design(factor.names = categorical_fctr_def) %>%
+  as_tibble() %>%
+  mutate(scenario = row_number()) %>%
+  relocate(scenario)
+```
+
+table of scenarios
+
+```{r}
+plan
+```
+
+coloured table of scenarios
+
+```{r}
+
+plan %>%
+
+  formattable(list(
+    pri_car = formatter(
+      "span",
+      style = x ~ ifelse(x == "status quo",
+                         style(color = "red",font.weight = "bold"),
+                         style(color = "green",font.weight = "bold")
+                         )
+    ),
+    n_transfer = formatter(
+      "span",
+      style = x ~ ifelse(x == "one transfer",
+                         style(color = "red",font.weight = "bold"),
+                         style(color = "green",font.weight = "bold")
+                         )
+    ),
+    freq = formatter(
+      "span",
+      style = x ~ ifelse(x == "status quo",
+                         style(color = "red",font.weight = "bold"),
+                         style(color = "green",font.weight = "bold")
+                         )
+    ),
+    fare = formatter(
+      "span",
+      style = x ~ ifelse(x == "status quo",
+                         style(color = "red",font.weight = "bold"),
+                         style(color = "green",font.weight = "bold")
+                         )
+    )
+    
+    
+    ))
+```
+
+## Full factorial design (with blocks)
+
+creation of scenarios
+
+```{r}
+plan<-fac.design(factor.names=categorical_fctr_def, blocks=2, seed=12345) %>% as_tibble
+```
+
+coloured table of scenarios
+
+```{r}
+
+plan %>%
+
+  formattable(list(
+    Blocks = formatter(
+      "span",
+      style = x ~ ifelse(x == 1,
+                         style(color = "orange",font.weight = "bold"),
+                         style(color = "purple",font.weight = "bold")
+                         )
+    ),
+    
+    pri_car = formatter(
+      "span",
+      style = x ~ ifelse(x == "status quo",
+                         style(color = "red",font.weight = "bold"),
+                         style(color = "green",font.weight = "bold")
+                         )
+    ),
+    n_transfer = formatter(
+      "span",
+      style = x ~ ifelse(x == "one transfer",
+                         style(color = "red",font.weight = "bold"),
+                         style(color = "green",font.weight = "bold")
+                         )
+    ),
+    freq = formatter(
+      "span",
+      style = x ~ ifelse(x == "status quo",
+                         style(color = "red",font.weight = "bold"),
+                         style(color = "green",font.weight = "bold")
+                         )
+    ),
+    fare = formatter(
+      "span",
+      style = x ~ ifelse(x == "status quo",
+                         style(color = "red",font.weight = "bold"),
+                         style(color = "green",font.weight = "bold")
+                         )
+    )
+    
+    
+    ))
+```
