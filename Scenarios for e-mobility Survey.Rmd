@@ -26,27 +26,21 @@ library(tidyverse)
 library(reactablefmtr)
 ```
 
-# Creating Experimental Designs
-
-defining variables for each type
-
-```{r}
+```{r  include=FALSE}
+# var definition
 factor_definitions <- list(
   Blocks = 1:3,
   in_vhc_time = c(10, 15, 20),
   wtng_time = c(5, 10, 15),
   n_xfer = c(0, 1, 2),
   comfort = c("uncomfortable", "comfortable"),
-  cost_car = c(6, 9,12),
-  fare = c(6, 9,12)
+  cost_car = c(10, 15,20),
+  fare = c(8, 12,16)
 )
 ```
 
-## Scenarios
-
-creation of scenarios
-
-```{r}
+```{r  include=FALSE}
+# creation-of-scenarios
 plan <-
   oa.design(factor.names = factor_definitions) %>%
   as_tibble() %>%
@@ -57,7 +51,8 @@ plan <-
   relocate(Scenario, .after = Blocks)
 ```
 
-```{r}
+```{r  include=FALSE}
+# create_plan
 plan <-plan %>% 
   mutate(
     in_vhc_time=in_vhc_time %>% 
@@ -79,9 +74,9 @@ plan <-plan %>%
     )
 ```
 
-table of scenarios
+Table of scenarios
 
-```{r}
+```{r echo=FALSE}
 
 plan %>%
 
