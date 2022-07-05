@@ -24,7 +24,22 @@ library(DoE.base)
 library(formattable)
 library(tidyverse)
 library(reactablefmtr)
+library(gt)
 ```
+
+# Introduction
+
+I tried to change the resulting table as similar as the table that Jamie has sent. Although I could do this in Excel, I prefer to do it in R to make it reproducible. We are still flexible to problems that might occur. 
+
+Indeed, I think we have already encountered a problem. I realized that we need an additional travel time (or in vehicle time) varible for private car mode. We need it because of the same reason that made us separate the travel cost variable. 
+
+Although I prepared the results for the design that we agreed on the yesterday's meeting, I also made a new desing that includes this new variable. I presented both tables in separate sections below.
+
+# Initial Design
+
+The table below is based on the design that we agreed on the yesterday's meeting. 
+
+
 
 ```{r  include=FALSE}
 # var definition
@@ -71,12 +86,15 @@ plan <-plan %>%
       as.character() %>% 
       as.integer() %>% 
       suffix(" tl")  
-    )
+    ) %>% 
+  mutate(in_vhc_time_car=in_vhc_time)
 ```
 
-Table of scenarios
 
-```{r echo=FALSE}
+
+```{r eval=FALSE, include=FALSE}
+
+# with formattable
 
 plan %>%
 
@@ -98,4 +116,156 @@ plan %>%
     fare = color_tile("white", "orange"),
     Blocks = color_tile("lightgreen" ,"lightpink")
     ))
+```
+
+```{r echo=FALSE}
+
+# with gt
+gt(plan) %>%
+  tab_header(
+    title = "Scenarios for e-mobility Survey in Izmir, TURKEY",
+    subtitle = "Grouped by Block"
+  ) %>%
+  tab_spanner(
+    label = "Private Car",
+    columns = c(in_vhc_time_car, cost_car)
+  ) %>%
+  tab_spanner(
+    label = "Public Transport",
+    columns = c(in_vhc_time,wtng_time, n_xfer, comfort,fare)
+  )%>%
+  tab_style(
+    style = cell_borders(
+      sides = c("left", "right"),
+      color = "grey",
+      weight = px(2)
+    ),
+    locations = cells_body(
+      columns = everything(),
+      rows = everything()
+    )
+  ) %>% 
+  tab_style(
+    style = cell_borders(
+      sides = c("left", "right"),
+      color = "grey",
+      weight = px(2)
+    ),
+    locations=cells_column_labels(columns = everything())
+  )%>% 
+  tab_style(
+    style = cell_borders(
+      sides = c("left", "right"),
+      color = "grey",
+      weight = px(2)
+    ),
+    locations=cells_column_spanners(spanners = everything())
+  ) %>% 
+  cols_label(
+    in_vhc_time_car = html("in_vhc_time")
+  )
+```
+
+# New Design
+The table below is based on the design that includes new travel time variable for private car mode. Note that in this design, the travel times of two modes are not always identical as in the initial design. I strongly suggest this approach. Moreover, there are also distinct variables for the travel time of public transport and private car modes in the survey (conducted in one of the Arabic countries) that we discussed in the meeting.
+
+
+
+```{r  include=FALSE}
+# var definition
+factor_definitions2 <- list(
+  Blocks = 1:3,
+  in_vhc_time = c(10, 15, 20),
+  wtng_time = c(5, 10, 15),
+  n_xfer = c(0, 1, 2),
+  comfort = c("uncomfortable", "comfortable"),
+  cost_car = c(10, 15,20),
+  fare = c(8, 12,16),
+  travel_time=c(15,20,25)
+)
+```
+
+```{r  include=FALSE}
+# creation-of-scenarios
+plan2 <-
+  oa.design(factor.names = factor_definitions2) %>%
+  as_tibble() %>%
+  arrange(Blocks) %>%
+  group_by(Blocks) %>%
+  mutate(Scenario = row_number()) %>%
+  ungroup() %>%
+  relocate(Scenario, .after = Blocks)
+```
+
+```{r  include=FALSE}
+# create_plan
+plan2 <-plan2 %>% 
+  mutate(
+    in_vhc_time=in_vhc_time %>% 
+      as.character() %>% 
+      as.integer() %>% 
+      suffix(" min"),
+    wtng_time =wtng_time  %>% 
+      as.character() %>% 
+      as.integer() %>% 
+      suffix(" min"),    
+    cost_car =cost_car  %>% 
+      as.character() %>% 
+      as.integer() %>% 
+      suffix(" tl"),   
+    fare  =fare   %>% 
+      as.character() %>% 
+      as.integer() %>% 
+      suffix(" tl"),
+    travel_time=travel_time %>% 
+      as.character() %>% 
+      as.integer() %>% 
+      suffix(" min")
+    )
+```
+
+```{r echo=FALSE}
+
+# with gt
+plan2 %>% 
+  gt() %>%
+  tab_header(
+    title = "Scenarios for e-mobility Survey in Izmir, TURKEY",
+    subtitle = "Grouped by Block"
+  ) %>%
+  tab_spanner(
+    label = "Private Car",
+    columns = c(travel_time, cost_car)
+  ) %>%
+  tab_spanner(
+    label = "Public Transport",
+    columns = c(in_vhc_time,wtng_time, n_xfer, comfort,fare)
+  )%>%
+  tab_style(
+    style = cell_borders(
+      sides = c("left", "right"),
+      color = "grey",
+      weight = px(2)
+    ),
+    locations = cells_body(
+      columns = everything(),
+      rows = everything()
+    )
+  ) %>% 
+    tab_style(
+    style = cell_borders(
+      sides = c("left", "right"),
+      color = "grey",
+      weight = px(2)
+    ),
+    locations=cells_column_labels(columns = everything())
+  )%>% 
+    tab_style(
+    style = cell_borders(
+      sides = c("left", "right"),
+      color = "grey",
+      weight = px(2)
+    ),
+    locations=cells_column_spanners(spanners = everything())
+  )
 ```
