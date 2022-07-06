@@ -1,0 +1,266 @@
+---
+title: 'Scenarios for e-mobility Survey'
+author: "[Orhan Aktaş](https://www.linkedin.com/in/orhanaktas/)"
+date: "6 July 2022"
+output:
+  html_document:
+    theme: flatly
+    df_print: paged
+    number_sections: true
+  pdf_document: default
+  word_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+	echo = TRUE,
+	message = FALSE,
+	warning = FALSE
+)
+```
+
+```{r libraries, include=FALSE}
+library(DoE.base)
+library(formattable)
+library(tidyverse)
+library(reactablefmtr)
+library(gt)
+```
+
+# Izmir
+
+The table below is based on the stats we collected for Izmir. Variables related to travel times are taken from household surveys, whereas fare information is from the municipalities. Lastly average travel cost for private car is calculated by using average travel time for private car trips (hh survey) and vehicle operation unit cost for a passenger car value which was previously calculated by Arup in another study. By using these base values, for the most of the variables (exception numeric variables are number of transfers and fare.) other levels were calculated as 25% higher and 50% higher than the base value. These multipliers were defined as an initial ones and can be changed later. The metrics are summarized below.
+
+-   Average waiting time in public transport trips is 10.9 min (used as 10 min)
+
+-   Average in vehicle time in public transport trips is 22 min (used as 25 min)
+
+-   Fare of a one standard ticket is 6.50 TL. The other levels are selected as 8.00 TL and 10.00 TL.
+
+-   Average travel time of private car trip is 31.9 min (used as 30 min)
+
+-   Average travel cost of private car trip is 68.5 TL (used as 70 TL)
+
+```{r  include=FALSE}
+# var definition
+level_pct<-c(1,1.25,1.5)
+factor_definitions <- list(
+  Blocks = 1:3,
+  ivt_pt = 25*level_pct,
+  wt_pt = 10*level_pct,
+  n_xfer_pt = c(0, 1, 2),
+  comfort_pt = c("uncomfortable", "comfortable"),
+  cost_car = 70*level_pct,
+  fare_pt = c(6.50, 8.00, 10.00),
+  ivt_car=30*level_pct
+)
+```
+
+```{r  include=FALSE}
+# creation-of-scenarios
+plan <-
+  oa.design(factor.names = factor_definitions) %>%
+  as_tibble() %>%
+  arrange(Blocks) %>%
+  group_by(Blocks) %>%
+  mutate(Scenario = row_number()) %>%
+  ungroup() %>%
+  relocate(Scenario, .after = Blocks)
+```
+
+```{r  include=FALSE}
+# create_plan
+plan <-plan %>% 
+  mutate(
+    ivt_pt=ivt_pt %>% 
+      as.character() %>% 
+      as.integer() %>% 
+      suffix(" min"),
+    wt_pt =wt_pt  %>% 
+      as.character() %>% 
+      as.integer() %>% 
+      suffix(" min"),    
+    cost_car =cost_car  %>% 
+      as.character() %>% 
+      as.integer() %>% 
+      suffix(" tl"),   
+    fare_pt  =fare_pt   %>% 
+      as.character() %>% 
+      as.integer() %>% 
+      suffix(" tl"),
+    ivt_car=ivt_car %>% 
+      as.character() %>% 
+      as.integer() %>% 
+      suffix(" min"),
+    wt_car=as.integer(0) %>% 
+      suffix(" min"),
+    comfort_car="standart",
+    n_xfer_car=as.factor(0)
+    )
+    ##################wtng_time_car =wtng_time_pt
+```
+
+```{r echo=FALSE}
+
+# with gt
+plan %>% 
+  gt() %>%
+  tab_header(
+    title = "Scenarios for e-mobility Survey in Izmir, TURKEY",
+    subtitle = "Grouped by Block"
+  ) %>%
+  tab_spanner(
+    label = "Private Car",
+    columns = c(wt_car,ivt_car,n_xfer_car,comfort_car, cost_car)
+  ) %>%
+  tab_spanner(
+    label = "Public Transport",
+    columns = c(wt_pt,ivt_pt, n_xfer_pt, comfort_pt,fare_pt)
+  )%>%
+  tab_style(
+    style = cell_borders(
+      sides = c("left", "right"),
+      color = "grey",
+      weight = px(2)
+    ),
+    locations = cells_body(
+      columns = everything(),
+      rows = everything()
+    )
+  ) %>% 
+    tab_style(
+    style = cell_borders(
+      sides = c("left", "right"),
+      color = "grey",
+      weight = px(2)
+    ),
+    locations=cells_column_labels(columns = everything())
+  )%>% 
+    tab_style(
+    style = cell_borders(
+      sides = c("left", "right"),
+      color = "grey",
+      weight = px(2)
+    ),
+    locations=cells_column_spanners(spanners = everything())
+  )
+```
+
+# Gaziantep
+
+The table below is based on the stats we collected for Gaziantep. The calculation process is same as Izmir's. The metrics are summarized below.
+
+-   Average waiting time in public transport trips is 13.2 min (used as 15 min)
+
+-   Average in vehicle time in public transport trips is 28.5 min (used as 25 min)
+
+-   Fare of a one standard ticket is 5.25 TL. The other levels are selected as 6.50 TL and 8.00 TL.
+
+-   Average travel time of private car trip is 29.5 min (used as 30 min)
+
+-   Average travel cost of private car trip is 54.8 TL (used as 55 TL)
+
+```{r  include=FALSE}
+# var definition
+level_pct<-c(1,1.25,1.5)
+factor_definitions <- list(
+  Blocks = 1:3,
+  ivt_pt = 30*level_pct,
+  wt_pt = 15*level_pct,
+  n_xfer_pt = c(0, 1, 2),
+  comfort_pt = c("uncomfortable", "comfortable"),
+  cost_car = 55*level_pct,
+  fare_pt = c(5.25, 6.50, 8.00),
+  ivt_car=30*level_pct
+)
+```
+
+```{r  include=FALSE}
+# creation-of-scenarios
+plan <-
+  oa.design(factor.names = factor_definitions) %>%
+  as_tibble() %>%
+  arrange(Blocks) %>%
+  group_by(Blocks) %>%
+  mutate(Scenario = row_number()) %>%
+  ungroup() %>%
+  relocate(Scenario, .after = Blocks)
+```
+
+```{r  include=FALSE}
+# create_plan
+plan <-plan %>% 
+  mutate(
+    ivt_pt=ivt_pt %>% 
+      as.character() %>% 
+      as.integer() %>% 
+      suffix(" min"),
+    wt_pt =wt_pt  %>% 
+      as.character() %>% 
+      as.integer() %>% 
+      suffix(" min"),    
+    cost_car =cost_car  %>% 
+      as.character() %>% 
+      as.integer() %>% 
+      suffix(" tl"),   
+    fare_pt  =fare_pt   %>% 
+      as.character() %>% 
+      as.integer() %>% 
+      suffix(" tl"),
+    ivt_car=ivt_car %>% 
+      as.character() %>% 
+      as.integer() %>% 
+      suffix(" min"),
+    wt_car=as.integer(0) %>% 
+      suffix(" min"),
+    comfort_car="standart",
+    n_xfer_car=as.factor(0)
+    )
+    ##################wtng_time_car =wtng_time_pt
+```
+
+```{r echo=FALSE}
+
+# with gt
+plan %>% 
+  gt() %>%
+  tab_header(
+    title = "Scenarios for e-mobility Survey in Gaziantep, TURKEY",
+    subtitle = "Grouped by Block"
+  ) %>%
+  tab_spanner(
+    label = "Private Car",
+    columns = c(wt_car,ivt_car,n_xfer_car,comfort_car, cost_car)
+  ) %>%
+  tab_spanner(
+    label = "Public Transport",
+    columns = c(wt_pt,ivt_pt, n_xfer_pt, comfort_pt,fare_pt)
+  )%>%
+  tab_style(
+    style = cell_borders(
+      sides = c("left", "right"),
+      color = "grey",
+      weight = px(2)
+    ),
+    locations = cells_body(
+      columns = everything(),
+      rows = everything()
+    )
+  ) %>% 
+    tab_style(
+    style = cell_borders(
+      sides = c("left", "right"),
+      color = "grey",
+      weight = px(2)
+    ),
+    locations=cells_column_labels(columns = everything())
+  )%>% 
+    tab_style(
+    style = cell_borders(
+      sides = c("left", "right"),
+      color = "grey",
+      weight = px(2)
+    ),
+    locations=cells_column_spanners(spanners = everything())
+  )
+```
