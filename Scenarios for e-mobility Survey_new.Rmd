@@ -1,7 +1,7 @@
 ---
 title: 'Scenarios for e-mobility Survey'
 author: "[Orhan Aktaş](https://www.linkedin.com/in/orhanaktas/)"
-date: "6 July 2022"
+date: "7 July 2022"
 output:
   html_document:
     theme: flatly
@@ -29,7 +29,7 @@ library(gt)
 
 # Izmir
 
-The table below is based on the stats we collected for Izmir. Variables related to travel times are taken from household surveys, whereas fare information is from the municipalities. Lastly average travel cost for private car is calculated by using average travel time for private car trips (hh survey) and vehicle operation unit cost for a passenger car value which was previously calculated by Arup in another study. By using these base values, for the most of the variables (exception numeric variables are number of transfers and fare.) other levels were calculated as 25% higher and 50% higher than the base value. These multipliers were defined as an initial ones and can be changed later. The metrics are summarized below.
+The table below is based on the stats we collected for Izmir. Variables related to travel times are taken from household surveys, whereas fare information is from the municipalities. Lastly average travel cost for private car is calculated by using average travel time for private car trips (hh survey) and vehicle operation unit cost for a passenger car value which was previously calculated by Arup in another study. By using these base values, for the most of the variables (exception numeric variables are number of transfers and fare.) other levels were calculated as 50% higher and 100% higher than the base value. These multipliers were defined as an initial ones and can be changed later. The metrics are summarized below.
 
 -   Average waiting time in public transport trips is 10.9 min (used as 10 min)
 
@@ -43,16 +43,17 @@ The table below is based on the stats we collected for Izmir. Variables related 
 
 ```{r  include=FALSE}
 # var definition
-level_pct<-c(1,1.25,1.5)
+level_pct<-c(1,1.5,2)
 factor_definitions <- list(
   Blocks = 1:3,
   ivt_pt = 25*level_pct,
   wt_pt = 10*level_pct,
-  n_xfer_pt = c(0, 1, 2),
+  n_xfer_pt = c(0, 1,2),
   comfort_pt = c("uncomfortable", "comfortable"),
   cost_car = 70*level_pct,
-  fare_pt = c(6.50, 8.00, 10.00),
-  ivt_car=30*level_pct
+  fare_pt = c(6.50, 13.00, 20.00),
+  ivt_car=30*level_pct,
+  n_pax_car = c("1-2", "3-4")
 )
 ```
 
@@ -91,11 +92,7 @@ plan <-plan %>%
     ivt_car=ivt_car %>% 
       as.character() %>% 
       as.integer() %>% 
-      suffix(" min"),
-    wt_car=as.integer(0) %>% 
-      suffix(" min"),
-    comfort_car="standart",
-    n_xfer_car=as.factor(0)
+      suffix(" min")
     )
     ##################wtng_time_car =wtng_time_pt
 ```
@@ -111,7 +108,7 @@ plan %>%
   ) %>%
   tab_spanner(
     label = "Private Car",
-    columns = c(wt_car,ivt_car,n_xfer_car,comfort_car, cost_car)
+    columns = c(ivt_car,n_pax_car, cost_car)
   ) %>%
   tab_spanner(
     label = "Public Transport",
@@ -162,7 +159,7 @@ The table below is based on the stats we collected for Gaziantep. The calculatio
 
 ```{r  include=FALSE}
 # var definition
-level_pct<-c(1,1.25,1.5)
+level_pct<-c(1,1.5,2)
 factor_definitions <- list(
   Blocks = 1:3,
   ivt_pt = 30*level_pct,
@@ -170,8 +167,9 @@ factor_definitions <- list(
   n_xfer_pt = c(0, 1, 2),
   comfort_pt = c("uncomfortable", "comfortable"),
   cost_car = 55*level_pct,
-  fare_pt = c(5.25, 6.50, 8.00),
-  ivt_car=30*level_pct
+  fare_pt = c(5.25, 10.00, 15.00),
+  ivt_car=30*level_pct,
+  n_pax_car = c("1-2", "3-4")
 )
 ```
 
@@ -210,13 +208,8 @@ plan <-plan %>%
     ivt_car=ivt_car %>% 
       as.character() %>% 
       as.integer() %>% 
-      suffix(" min"),
-    wt_car=as.integer(0) %>% 
-      suffix(" min"),
-    comfort_car="standart",
-    n_xfer_car=as.factor(0)
+      suffix(" min")
     )
-    ##################wtng_time_car =wtng_time_pt
 ```
 
 ```{r echo=FALSE}
@@ -230,7 +223,7 @@ plan %>%
   ) %>%
   tab_spanner(
     label = "Private Car",
-    columns = c(wt_car,ivt_car,n_xfer_car,comfort_car, cost_car)
+    columns = c(ivt_car,n_pax_car, cost_car)
   ) %>%
   tab_spanner(
     label = "Public Transport",
