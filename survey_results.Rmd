@@ -1,0 +1,129 @@
+---
+title: 'e-mobility Survey Results'
+author: "[Orhan Aktaş](https://www.linkedin.com/in/orhanaktas/)"
+date: "7 Sep 2022"
+output:
+  html_document:
+    theme: flatly
+    df_print: paged
+    number_sections: true
+  pdf_document: default
+  word_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+	echo = TRUE,
+	message = FALSE,
+	warning = FALSE
+)
+```
+
+```{r libraries, include=FALSE}
+
+library(tidyverse)
+library(corrplot)
+library(ggpubr)
+library(kableExtra)
+library(formattable)
+library(reactablefmtr)
+library(gt)
+library(readxl)
+```
+
+# data import
+
+```{r}
+survey_results_izmir <- read_excel("survey_results.xlsx",sheet = 1)
+survey_results_gaziantep <- read_excel("survey_results.xlsx",sheet = 2)
+```
+
+# data wrangle
+
+
+```{r}
+survey_results_izmir_int <- survey_results_izmir %>% 
+  mutate(wt_pt=str_replace(wt_pt," min","") %>% as.integer,
+         ivt_pt=str_replace(ivt_pt," min","") %>% as.integer,
+         ivt_car=str_replace(ivt_car," min","") %>% as.integer,
+         cost_car=str_replace(cost_car," TL","") %>% as.integer,
+         fare_pt=str_replace(fare_pt," TL","") %>% as.integer) 
+
+```
+
+# Izmir
+
+```{r }
+survey_results_izmir %>% 
+ ggplot(aes(x=fare_pt,y=pt_share)) +
+  geom_col()+ 
+  facet_grid(comfort_pt + wt_pt ~ ivt_car+cost_car)
+```
+
+buradaki mesele bir çok kombinasyon olmasına rağmen bunları sadece küçük bir altkümesini senaryo olarak seçmemiz. Bu nedenle grafikler oldukça **delikli** görünüyor. Bu nedenle ortalamalar üzerinden gideceğim.
+
+```{r}
+trial <- survey_results_izmir %>% 
+  mutate(fare_pt=as_factor(fare_pt),
+         cost_car=as_factor(cost_car) %>% fct_reorder(str_replace(cost_car," TL","") %>% as.integer)
+  )
+
+
+ survey_results_izmir_int %>% 
+   select(-Scenario,-car_share,-pt_share) %>% 
+   names() %>% 
+   map(~trial %>% 
+          group_by(.data[[.x]]) %>% 
+          summarise(mean=mean(pt_share)) 
+       
+       # %>% 
+       #    rename(x_var = 1) %>% 
+       #    ggplot(aes(x = x_var))+
+       #      geom_col(aes(y=mean))+
+       #      xlab(.x)+ylab("PT Share")+ ylim (0, 1)
+       
+       )
+     
+
+```
+
+```{r}
+my_cols <- c("#0D0887FF", "#6A00A8FF", "#B12A90FF",
+"#E16462FF", "#FCA636FF", "#F0F921FF")
+
+trial <- survey_results_izmir %>% 
+  mutate(fare_pt=as_factor(fare_pt),
+         cost_car=as_factor(cost_car) %>% fct_reorder(str_replace(cost_car," TL","") %>% as.integer)
+  )
+ggballoonplot(
+ trial, 
+ x = "fare_pt", 
+ y = "cost_car",
+ size = "pt_share", 
+ size.range = c(0, 10),
+ fill = "pt_share",
+ ggtheme = theme_bw()
+)+
+  #scale_fill_gradientn(colors = my_cols)+ 
+  scale_fill_gradient(low = "yellow", high = "red", na.value = NA)+
+  facet_grid(ivt_car+comfort_pt ~ ivt_pt+wt_pt, 
+             labeller = labeller(
+                          .cols = label_both, 
+                          comfort_pt = label_value,
+                          ivt_car=label_both))+    
+  theme(strip.text.x  = element_text(size = 12),
+        strip.text.y  = element_text(size = 12,angle = 0)) # Change font size
+  
+
+```
+
+# correlation matrix
+
+```{r}
+
+M = cor(survey_results_izmir_int %>% select(-Scenario,-comfort_pt,-n_pax_car,-car_share))
+ 
+corrplot(M)
+
+
+```
