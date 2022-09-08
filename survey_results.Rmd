@@ -88,6 +88,7 @@ trial <- survey_results_izmir %>%
 ```
 
 ```{r}
+
 my_cols <- c("#0D0887FF", "#6A00A8FF", "#B12A90FF",
 "#E16462FF", "#FCA636FF", "#F0F921FF")
 
@@ -110,10 +111,13 @@ ggballoonplot(
              labeller = labeller(
                           .cols = label_both, 
                           comfort_pt = label_value,
-                          ivt_car=label_both))+    
+                          ivt_car=label_both)
+                        )+    
   theme(strip.text.x  = element_text(size = 12),
-        strip.text.y  = element_text(size = 12,angle = 0)) # Change font size
-  
+        strip.text.y  = element_text(size = 12,angle = 0))+ # Change font size
+   labs(tag = "XX")+
+  theme(plot.tag.position = c(.8, .95))
+
 
 ```
 
